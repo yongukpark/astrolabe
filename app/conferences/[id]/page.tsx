@@ -52,6 +52,11 @@ export default function Page() {
 
   const pending = rounds.some((r) => r.pending);
 
+  // The list starts empty; during the first search it fills with judged hits only (not the whole conference)
+  const listed = rounds.length === 0 ? []
+    : rounds.length === 1 && pending ? visible.filter((p) => rounds[0].probs[p.id] !== undefined)
+    : visible;
+
   // per-paper state for the dot field, in file order: -1 idle, -2 waiting for Jev, -3 filtered out, else P(relevant)
   const states = useMemo(() => {
     const last = rounds.at(-1);
@@ -177,11 +182,11 @@ export default function Page() {
         </p>
       )}
 
-      {done && visible.length === 0 ? (
+      {rounds.length === 0 ? null : done && visible.length === 0 ? (
         <p className="empty">기준값 {threshold.toFixed(2)}을 넘는 논문이 없습니다. 기준값을 낮추거나 주제를 넓혀 보세요.</p>
       ) : (
         <ul className="papers">
-          {visible.map((p) => <Row key={p.id} p={p} prob={last?.probs[p.id]} />)}
+          {listed.map((p) => <Row key={p.id} p={p} prob={last?.probs[p.id]} />)}
         </ul>
       )}
     </main>
