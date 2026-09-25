@@ -20,17 +20,18 @@ export default function Conferences() {
 
   if (!key) return null;
   return (
-    <main className="narrow">
-      <div className="row">
-        <h1>학회 선택</h1>
-        <Link href="/" className="muted">{key.name} · 키 변경</Link>
-      </div>
+    <main>
+      <nav className="top">
+        <span className="wordmark">Find Papers</span>
+        <Link href="/">{key.name} · 키 변경</Link>
+      </nav>
+      <h1 style={{ marginBottom: 20 }}>어느 학회를 거를까요?</h1>
       <ul className="confs">
         {confs.map((c) => (
           <li key={c.id}>
             <Link href={`/conferences/${c.id}`}>
               <strong>{c.name}</strong>
-              <span className="muted">{c.count.toLocaleString()}편</span>
+              <span className="mono muted">{c.count.toLocaleString()}편</span>
             </Link>
           </li>
         ))}

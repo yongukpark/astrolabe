@@ -10,7 +10,7 @@ NeurIPS · ICLR · ICML 채택 논문 전체를 [Jev](https://typesafe.ai)가 �
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Jev](https://img.shields.io/badge/model-Jev%20(TypeSafe)-7c3aed)
-![Deploy](https://img.shields.io/badge/deploy-Vercel-000?logo=vercel)
+![Local](https://img.shields.io/badge/run-local%20only-2563eb)
 
 </div>
 
@@ -19,11 +19,11 @@ NeurIPS · ICLR · ICML 채택 논문 전체를 [Jev](https://typesafe.ai)가 �
 ## ✨ 특징
 
 - **전수 판정** — 키워드·임베딩으로 미리 자르지 않고, 5,857편(NeurIPS 2025) 전체를 Jev가 읽고 판정합니다.
-- **빠르고 싸다** — 전체 판정 **약 4초 · 약 $0.08** (실측).
+- **빠르고 싸다** — 전체 판정 **약 2초 · 약 $0.08** (실측).
 - **줄어드는 화면** — 판정이 도착하는 대로 관련 없는 논문이 목록에서 빠져나갑니다.
 - **좁히기** — 결과를 보고 조건을 덧붙이면 남은 논문만 다시 판정합니다 (비용 거의 0).
 - **기준값 슬라이더** — 판정은 확률로 오기 때문에, 추가 호출 없이 엄격함을 조절할 수 있습니다.
-- **내 키로 동작** — TypeSafe 또는 OpenRouter 키를 브라우저에 넣어 씁니다. 서버에 키를 저장하지 않습니다.
+- **내 PC에서, 내 키로** — 각자 로컬에서 실행합니다. 키는 내 브라우저와 내 PC의 로컬 서버만 거쳐 Jev로 갑니다.
 - **메타데이터** — 제목 · 초록 · PDF 링크 · 트랙 · oral/spotlight/poster · 분야.
 
 ## 🧭 동작 방식
@@ -32,14 +32,14 @@ NeurIPS · ICLR · ICML 채택 논문 전체를 [Jev](https://typesafe.ai)가 �
 flowchart LR
     A["학회 공개 데이터 (neurips.cc 등)"] -->|fetch_conf.py| B[("public/data/*.json")]
     B --> C[브라우저: 전체 목록 표시]
-    C -->|"검색어 + 논문 80편씩, 8개 병렬"| D["/api/judge"]
+    C -->|"검색어 + 논문 약 160편씩, 한 번에 병렬"| D["/api/judge"]
     D -->|사용자 키| E["Jev (TypeSafe · OpenRouter)"]
     E -->|"논문별 P(관련)"| C
     C -->|기준값 미만 제거| F[남은 논문]
 ```
 
 Jev는 문장을 생성하지 않고 **판정만 반환하는 모델**입니다(TypeSafe의 "System-1" 모델).
-검색어를 `state`로, 논문 80편 각각을 예/아니오 질문(`noul`)으로 한 번에 보내면, 질문마다 독립적으로 `P(예)`가 돌아옵니다.
+검색어를 `state`로, 논문 약 160편(요청당 약 53k 토큰) 각각을 예/아니오 질문(`noul`)으로 한 번에 보내면, 질문마다 독립적으로 `P(예)`가 돌아옵니다.
 
 ## 🚀 빠른 시작
 
@@ -57,6 +57,8 @@ http://localhost:3000 을 열고:
 3. **검색** — 찾고 싶은 연구 주제를 입력합니다.
 
 > 환경변수는 필요 없습니다. 키는 화면에서 입력하고, 브라우저 localStorage에만 저장됩니다.
+>
+> Node.js 20 이상이 필요합니다. 학회 데이터(`public/data`)는 저장소에 포함되어 있어 바로 쓸 수 있습니다.
 
 ### API 키 발급
 
@@ -117,24 +119,25 @@ find-papers/
 │   ├── page.tsx                  # 키 선택 (별명 · 여러 키)
 │   ├── conferences/page.tsx      # 학회 선택
 │   ├── conferences/[id]/page.tsx # 검색 · 줄어드는 목록 · 기준값 슬라이더
-│   └── api/judge/route.ts        # 논문 80편 → Jev 호출 → {id: 확률}
+│   └── api/judge/route.ts        # 논문 묶음 → Jev 호출 → {id: 확률}
 ├── lib/key.ts                    # 브라우저 키 저장소
 ├── public/data/                  # 학회별 논문 JSON + index.json
 └── scripts/fetch_conf.py         # 학회 데이터 수집
 ```
 
-DB도 벡터 DB도 없습니다. 논문 데이터는 정적 JSON이고, 서버는 키를 전달하는 얇은 프록시뿐입니다.
+DB도 벡터 DB도 없습니다. 논문 데이터는 정적 JSON이고, 로컬 서버는 키를 전달하는 얇은 프록시뿐입니다.
 
-## ☁️ 배포
+## 🏠 왜 로컬 전용인가
 
-Vercel에서 이 저장소를 Import 하면 끝입니다. 환경변수 설정은 필요 없습니다.
-(사용자가 각자 자기 키를 넣기 때문에 배포자에게 과금되지 않습니다.)
+Jev 호출은 `/api/judge`(Next.js 서버)를 거칩니다. TypeSafe API가 브라우저 직접 호출(CORS)을 막고 있어서입니다.
+이 서버를 공개 배포하면 **다른 사람의 키가 배포자의 서버를 지나가게** 되므로, 각자 자기 PC에서 실행하는 방식을 택했습니다.
+로컬에서는 그 서버가 곧 내 PC이므로 키가 외부 제3자를 거치지 않습니다.
 
 ## 🔒 키 보관
 
 - 키는 **브라우저 localStorage**에만 평문으로 저장됩니다 (`find-papers-keys`).
-- 검색할 때마다 `/api/judge`를 거쳐 Jev로 전달되며, 서버는 저장하거나 기록하지 않습니다.
-- 공용 PC에서는 사용 후 키를 삭제하세요. 사용 한도를 건 키를 권장합니다.
+- 검색할 때마다 내 PC의 `/api/judge`를 거쳐 Jev로 전달되며, 저장하거나 기록하지 않습니다.
+- 공용 PC에서는 사용 후 키를 삭제하세요. 사용 한도를 건 키를 권장합니다 (OpenRouter는 키별 한도 설정 가능).
 
 ## 🛣 로드맵
 

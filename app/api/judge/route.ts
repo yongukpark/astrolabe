@@ -8,8 +8,8 @@ const PROVIDERS = {
   typesafe: { url: 'https://api.typesafe.ai/v1/systemone', model: 'jev-latest' },
   openrouter: { url: 'https://openrouter.ai/api/alpha/decisions', model: 'typesafe/jev-1.13' },
 };
-// ~310 tok/paper → ~25k tokens, under Jev's 32k context. Measured: 5998 papers, 75 calls @8 parallel, 3.5s, 0 fails
-const MAX_BATCH = 80;
+// Client batches by text size (≈53k tokens); this is only a sanity cap. Jev itself rejects >64k tokens.
+const MAX_BATCH = 400;
 
 const cache = new Map<string, Promise<Map<string, Paper>>>();
 const load = (conf: string) => {
