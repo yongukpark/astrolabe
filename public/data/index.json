@@ -1,0 +1,22 @@
+[
+ {
+  "id": "neurips2025",
+  "name": "NeurIPS 2025",
+  "count": 5857
+ },
+ {
+  "id": "icml2025",
+  "name": "ICML 2025",
+  "count": 3339
+ },
+ {
+  "id": "iclr2025",
+  "name": "ICLR 2025",
+  "count": 3830
+ },
+ {
+  "id": "neurips2024",
+  "name": "NeurIPS 2024",
+  "count": 4537
+ }
+]

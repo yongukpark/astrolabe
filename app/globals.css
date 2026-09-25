@@ -1,0 +1,34 @@
+:root { --bg: #fff; --fg: #111; --muted: #666; --line: #e5e5e5; --accent: #2563eb; }
+@media (prefers-color-scheme: dark) { :root { --bg: #0f0f10; --fg: #eee; --muted: #999; --line: #2a2a2d; --accent: #60a5fa; } }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
+main { max-width: 900px; margin: 0 auto; padding: 16px; }
+form { display: flex; gap: 8px; }
+input[type=text] { flex: 1; padding: 10px; font: inherit; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; }
+button { padding: 10px 14px; font: inherit; border-radius: 6px; border: 1px solid var(--line); background: var(--accent); color: #fff; cursor: pointer; }
+button:disabled { opacity: .5; }
+.bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 12px 0; color: var(--muted); font-size: 14px; }
+.count { font-size: 28px; font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; }
+.rounds span { background: var(--line); border-radius: 4px; padding: 2px 6px; margin-right: 4px; }
+ul { list-style: none; padding: 0; margin: 0; }
+li { border-top: 1px solid var(--line); padding: 10px 0; content-visibility: auto; contain-intrinsic-size: auto 60px; animation: in .25s; }
+@keyframes in { from { opacity: 0; } }
+li .meta { color: var(--muted); font-size: 13px; }
+li .p { color: var(--accent); font-variant-numeric: tabular-nums; }
+li a { color: inherit; }
+details p { color: var(--muted); font-size: 14px; }
+.narrow { max-width: 560px; }
+.muted { color: var(--muted); }
+a.muted, .row a { text-decoration: none; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.stack { flex-direction: column; gap: 12px; }
+.choices { display: flex; gap: 8px; }
+.choice { flex: 1; padding: 12px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.choice.on { border-color: var(--accent); }
+.keys { margin-bottom: 16px; }
+.keys li { display: flex; gap: 8px; align-items: center; animation: none; }
+.keys li > span { flex: 1; }
+button.ghost { background: transparent; color: var(--fg); }
+input[type=password] { padding: 10px; font: inherit; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; }
+.confs li a { display: flex; justify-content: space-between; padding: 14px 4px; text-decoration: none; color: inherit; }
+.confs li a:hover strong { color: var(--accent); }
+.err { color: #dc2626; }
