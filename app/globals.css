@@ -76,7 +76,8 @@ input[type=range] { accent-color: var(--blue); width: 140px; }
 .trail { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 12px 0 0; font-size: 14px; }
 .trail .step { padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; }
 .trail .arrow { color: var(--muted); }
-.trail button { margin-left: auto; padding: 4px 12px; font-size: 13px; }
+.trail button { padding: 4px 12px; font-size: 13px; }
+.trail button:first-of-type { margin-left: auto; }
 .err { color: var(--danger); font-size: 14px; margin-top: 10px; }
 .empty { padding: 40px 0; color: var(--muted); }
 

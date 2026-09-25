@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { download, toCsv } from '../../../lib/csv';
 import { loadKey, type Key } from '../../../lib/key';
 
 type Paper = {
@@ -114,6 +115,16 @@ export default function Page() {
   const last = rounds.at(-1);
   const done = rounds.length > 0 && !pending;
 
+  function exportCsv() {
+    const score = (v: number | undefined) => (v === undefined || Number.isNaN(v) ? null : +v.toFixed(3));
+    const rows = [
+      ['순위', ...rounds.map((r) => `점수: ${r.query}`), '제목', '발표', '트랙', '분야', 'PDF', '링크', '초록'],
+      ...visible.map((p, i) => [i + 1, ...rounds.map((r) => score(r.probs[p.id])), p.title, p.decision, p.track, p.topic, p.pdf, p.url, p.abstract]),
+    ];
+    const slug = rounds.map((r) => r.query).join('-').replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 60).replace(/^-|-$/g, '');
+    download(`${id}-${slug || 'papers'}.csv`, toCsv(rows));
+  }
+
   if (!key) return null;
   return (
     <main>
@@ -152,6 +163,9 @@ export default function Page() {
           {rounds.map((r, i) => (
             <span key={i}>{i > 0 && <span className="arrow">→ </span>}<span className="step">{r.query}</span></span>
           ))}
+          <button type="button" className="ghost" disabled={pending || !visible.length} onClick={exportCsv}>
+            CSV로 내보내기 ({visible.length.toLocaleString()}편)
+          </button>
           <button type="button" className="ghost" disabled={pending}
             onClick={() => { setRounds([]); setErrors(0); setLastError(''); }}>처음부터</button>
         </div>

@@ -25,6 +25,7 @@ NeurIPS · ICLR · ICML 채택 논문 전체를 [Jev](https://typesafe.ai)가 �
 - **기준값 슬라이더** — 판정은 확률로 오기 때문에, 추가 호출 없이 엄격함을 조절할 수 있습니다.
 - **내 PC에서, 내 키로** — 각자 로컬에서 실행합니다. 키는 내 브라우저와 내 PC의 로컬 서버만 거쳐 Jev로 갑니다.
 - **메타데이터** — 제목 · 초록 · PDF 링크 · 트랙 · oral/spotlight/poster · 분야.
+- **CSV 내보내기** — 남은 논문을 단계별 점수와 함께 저장합니다 (Excel에서 한글 그대로 열림).
 
 ## 🧭 동작 방식
 
@@ -143,5 +144,6 @@ Jev 호출은 `/api/judge`(Next.js 서버)를 거칩니다. TypeSafe API가 브�
 
 - [ ] Workshop 논문 (OpenReview 로그인 수집)
 - [ ] ICLR 2026 · ICML 2026 초록 수집
-- [ ] 결과 내보내기 (CSV · BibTeX)
+- [x] 결과 CSV 내보내기
+- [ ] BibTeX 내보내기
 - [ ] 여러 학회 동시 검색
