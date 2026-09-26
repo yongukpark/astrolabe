@@ -31,12 +31,16 @@ export default function Page() {
   const [found, setFound] = useState<Search | null>(null); // one search at a time; a new one replaces it
   const [threshold, setThreshold] = useState(0.7);
   const [errors, setErrors] = useState(0);
+  const [missing, setMissing] = useState(false);
 
   useEffect(() => {
     const k = loadKey();
     if (!k) return router.replace('/');
     setKey(k);
-    fetch(`/data/${id}.json`).then((r) => r.json()).then(setPapers);
+    fetch(`/data/${id}.json`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(setPapers)
+      .catch(() => setMissing(true)); // paper data isn't in the repo; `npm run data` pulls it
   }, [id, router]);
 
   const pending = !!found?.pending;
@@ -121,6 +125,14 @@ export default function Page() {
   }
 
   if (!key) return null;
+  if (missing)
+    return (
+      <main className="narrow">
+        <Link href="/conferences" className="wordmark">Astrolabe</Link>
+        <h1 style={{ marginTop: 10 }}>{name || id}</h1>
+        <p className="lede">이 학회의 논문 데이터가 아직 없습니다. 프로젝트 폴더에서 <code>npm run data</code>를 실행한 뒤 새로고침하세요.</p>
+      </main>
+    );
   return (
     <div className="sky">
       <section className="sky-main">

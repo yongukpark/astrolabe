@@ -4,3 +4,6 @@ node_modules
 next-env.d.ts
 *.tsbuildinfo
 data/raw
+# paper data: pulled per user with `npm run data` (copyright stays with authors; not redistributed)
+public/data/*.json
+!public/data/index.json

@@ -3,10 +3,12 @@
 neurips / iclr / icml: the <conf>.cc virtual-site dump (OpenReview's API blocks anonymous requests).
   Recent dumps ship without abstracts; those are filled from papercopilot/paperlists by OpenReview id or title.
 If neither has abstracts yet (e.g. NeurIPS right after decisions), papers are kept title-only and marked in index.json.
-Usage: python3 scripts/fetch_conf.py icml 2026 [local-dump.json]    (stdlib only)
+Usage: python3 scripts/fetch_conf.py all                            every conference listed in public/data/index.json
+       python3 scripts/fetch_conf.py icml 2026 [local-dump.json]    one conference (stdlib only)
 """
 import json
 import re
+import subprocess
 import sys
 import urllib.request
 from pathlib import Path
@@ -144,6 +146,14 @@ def test():
 def main():
     if sys.argv[1:] == ["test"]:
         return test()
+    if sys.argv[1:] == ["all"]:  # paper data isn't committed (copyright); each user pulls it
+        failed = []
+        for c in json.loads((DATA / "index.json").read_text()):
+            print(f"{c['name']}: ", end="", flush=True)
+            r = subprocess.run([sys.executable, __file__, c["conf"], str(c["year"])], capture_output=True, text=True)
+            print(r.stdout.strip().splitlines()[-1] if r.returncode == 0 else f"failed — {r.stderr.strip().splitlines()[-1]}")
+            failed += [c["name"]] if r.returncode else []
+        sys.exit(f"failed: {', '.join(failed)}" if failed else 0)
     conf, year = sys.argv[1].lower(), int(sys.argv[2])
     papers, n_raw, title_only = fetch_miniconf(conf, year, sys.argv[3] if len(sys.argv) > 3 else None)
     if not papers:

@@ -2,6 +2,7 @@
   "name": "astrolabe",
   "private": true,
   "scripts": {
+    "data": "python3 scripts/fetch_conf.py all",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"

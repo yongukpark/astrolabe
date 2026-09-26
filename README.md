@@ -38,6 +38,7 @@ Node.js 20 이상이 필요합니다.
 git clone https://github.com/yongukpark/astrolabe.git
 cd astrolabe
 npm install
+npm run data       # 학회 논문 데이터 받기 (약 15초~1분)
 npm run dev        # http://localhost:3000
 ```
 
@@ -72,16 +73,17 @@ npm run dev        # http://localhost:3000
 | 논문 링크 · PDF | [OpenReview](https://openreview.net), [NeurIPS Proceedings](https://proceedings.neurips.cc) | 링크만 저장하며 PDF는 저장하지 않음 |
 | 개최 시기 (월) | 각 학회 공식 사이트 | `public/data/index.json`에 수기 입력 |
 
-데이터 다시 받기:
+논문 데이터(제목 · 초록 등)는 **이 저장소에 포함되어 있지 않습니다.** `npm run data`가 위 공개 출처에서 각자의 PC로 직접 받습니다. 저장소에는 학회 목록(`public/data/index.json`)과 수집 스크립트만 있습니다.
 
 ```bash
-python3 scripts/fetch_conf.py neurips 2025
+npm run data                                     # public/data/index.json의 학회 전부
+python3 scripts/fetch_conf.py neurips 2025       # 한 학회만
 python3 scripts/fetch_conf.py neurips 2026 data/raw/neurips-2026-orals-posters.json   # 받아 둔 파일로
 ```
 
 ## 권리 고지
 
-- **논문 내용:** 논문 제목과 초록의 저작권은 각 저자와 해당 학회 · 출판사에 있습니다. 이 저장소는 개인 연구용 검색을 위해 공개된 메타데이터를 모아 두었을 뿐이며, 원문은 위 출처에서 확인해야 합니다. 저장소를 공개하거나 데이터를 재배포하려면 각 출처의 이용 조건을 먼저 확인하세요.
+- **논문 내용:** 논문 제목과 초록의 저작권은 각 저자와 해당 학회 · 출판사에 있습니다. 이 저장소는 논문 데이터를 담거나 재배포하지 않으며, 사용자가 개인 연구용 검색을 위해 공개 출처에서 직접 받습니다. 받은 데이터를 다시 배포하려면 각 출처의 이용 조건을 먼저 확인하세요.
 - **학회 명칭:** NeurIPS, ICLR, ICML은 각 주최 재단의 명칭입니다. 이 프로젝트는 어느 학회와도 관련이 없습니다.
 - **모델:** 판정은 TypeSafe의 Jev 모델을 사용자 본인의 키로 호출해 이뤄지며, 각 제공자([TypeSafe](https://typesafe.ai), [OpenRouter](https://openrouter.ai))의 이용 약관을 따릅니다.
 - **이미지:** `docs/`의 배너와 스크린샷은 이 프로젝트에서 직접 만든 것입니다. 스크린샷 속 논문 제목은 NeurIPS 2025 공개 데이터입니다.
