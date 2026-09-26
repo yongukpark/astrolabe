@@ -24,6 +24,27 @@ def norm(title):
     return re.sub(r"\W+", " ", title).strip().lower()
 
 
+PARTICLES = {"van", "von", "der", "den", "de", "del", "della", "da", "di", "du", "dos", "das", "e", "la", "le", "bin", "al"}
+
+
+def cite_name(fullname):
+    """'Jessica E Liang' -> 'J. Liang', 'Inês Oliveira e Silva' -> 'I. Oliveira e Silva', 'Xie' -> 'Xie'."""
+    parts = fullname.split()
+    if len(parts) < 2:
+        return fullname.strip()
+    i = len(parts) - 1  # surname starts at the last word, pulled left over lowercase particles (+ the word before 'e')
+    while i > 1 and parts[i - 1] in PARTICLES:
+        i -= 2 if parts[i - 1] == "e" else 1
+    return f"{parts[0][0]}. {' '.join(parts[max(i, 1):])}"
+
+
+def first_author(e):
+    authors = e.get("authors") or []
+    if not authors:
+        return None
+    return cite_name(authors[0]["fullname"]) + (" et al." if len(authors) > 1 else "")
+
+
 def decision(e):
     m = re.search(r"\((\w+)[^)]*\)", e.get("decision") or "")  # "spotlight poster" → spotlight
     d = m.group(1).lower() if m else None
@@ -81,6 +102,7 @@ def normalize(raw, title_only=False):
             "track": track(e),
             "workshop": None,
             "decision": decision(e),
+            "author": first_author(e),
             "topic": e.get("topic"),
         }
         old = papers.get(key)
@@ -102,10 +124,26 @@ def fetch_miniconf(conf, year, local=None):
     if sum(bool(e.get("abstract")) for e in raw) < len(raw) / 2:
         fill_abstracts(raw, conf, year)
     title_only = sum(bool(e.get("abstract")) for e in raw) < len(raw) / 2
-    return normalize(raw, title_only), len(raw), title_only
+    papers = normalize(raw, title_only)
+    if title_only:  # before the conference the PDFs aren't public either; don't show dead links
+        for p in papers:
+            p["pdf"] = None
+    return papers, len(raw), title_only
+
+
+def test():
+    assert cite_name("Jessica E Liang") == "J. Liang"
+    assert cite_name("Xie") == "Xie"
+    assert cite_name("Inês Oliveira e Silva") == "I. Oliveira e Silva"
+    assert cite_name("Ludwig van der Waals") == "L. van der Waals"
+    assert first_author({"authors": [{"fullname": "Jianbo Shi"}]}) == "J. Shi"
+    assert first_author({"authors": [{"fullname": "Jianbo Shi"}, {"fullname": "A B"}]}) == "J. Shi et al."
+    print("ok")
 
 
 def main():
+    if sys.argv[1:] == ["test"]:
+        return test()
     conf, year = sys.argv[1].lower(), int(sys.argv[2])
     papers, n_raw, title_only = fetch_miniconf(conf, year, sys.argv[3] if len(sys.argv) > 3 else None)
     if not papers:

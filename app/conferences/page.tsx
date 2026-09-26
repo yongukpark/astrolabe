@@ -21,7 +21,7 @@ export default function Conferences() {
   return (
     <main className="observatory">
       <nav className="top">
-        <span className="wordmark">Astrolabe</span>
+        <span className="wordmark">Astrolabe <em>for your research</em></span>
         <Link href="/">{key.name}</Link>
       </nav>
       <Timeline confs={confs} />

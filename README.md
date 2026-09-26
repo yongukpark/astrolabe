@@ -1,4 +1,4 @@
-# Astrolabe
+# Astrolabe — for your research
 
 학회 채택 논문 전체를 연구 주제 한 줄로 걸러보는 로컬 도구입니다.
 NeurIPS · ICLR · ICML 논문을 분야별 별자리로 펼치고, [Jev](https://typesafe.ai)가 초록마다 "이 주제에 맞는가"를 확률로 판정해 맞는 논문만 빛나게 합니다.

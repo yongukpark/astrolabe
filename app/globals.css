@@ -41,6 +41,7 @@ input[type=range] { accent-color: var(--gold); width: 140px; }
 
 .wordmark { font: 12px var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .wordmark::before { content: '✦ '; color: var(--gold); }
+.wordmark em { font-style: normal; text-transform: none; letter-spacing: 0.02em; color: var(--dim); margin-left: 6px; }
 .lede { margin: 10px 0 28px; color: var(--muted); }
 
 /* key + conference pages */
@@ -80,6 +81,7 @@ main.wide { max-width: 760px; padding-top: 8vh; }
 .sky { display: grid; grid-template-columns: minmax(0, 1fr) 420px; height: 100vh; }
 .sky-main { display: flex; flex-direction: column; gap: 12px; padding: 28px 36px; min-height: 0; }
 .sky-head { display: flex; flex-direction: column; gap: 6px; }
+.title-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .tally { font: 15px var(--display); color: var(--muted); }
 .tally b { color: var(--gold); font-weight: 400; }
 .stars { flex: 1; min-height: 300px; width: 100%; display: block; }

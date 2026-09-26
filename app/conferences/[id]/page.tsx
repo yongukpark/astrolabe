@@ -8,7 +8,7 @@ import { Matrix, useConfs } from '../../Matrix';
 
 type Paper = {
   id: string; title: string; abstract: string; pdf: string | null; url: string;
-  track: string; workshop: string | null; decision: string | null; topic: string | null;
+  track: string; workshop: string | null; decision: string | null; topic: string | null; author: string | null;
 };
 // probs[id]: undefined = not judged yet, NaN = judge call failed (kept visible)
 type Search = { query: string; probs: Record<string, number>; pending: boolean };
@@ -29,7 +29,7 @@ export default function Page() {
   const [lastError, setLastError] = useState('');
   const [papers, setPapers] = useState<Paper[]>([]);
   const [found, setFound] = useState<Search | null>(null); // one search at a time; a new one replaces it
-  const [threshold, setThreshold] = useState(0.65);
+  const [threshold, setThreshold] = useState(0.7);
   const [errors, setErrors] = useState(0);
 
   useEffect(() => {
@@ -38,11 +38,6 @@ export default function Page() {
     setKey(k);
     fetch(`/data/${id}.json`).then((r) => r.json()).then(setPapers);
   }, [id, router]);
-
-  // title-only conferences miss about half the matches at 0.65 (measured on NeurIPS 2025): start them lower
-  useEffect(() => {
-    if (conf) setThreshold(conf.titleOnly ? 0.4 : 0.65);
-  }, [conf?.id]);
 
   const pending = !!found?.pending;
   const prob = (p: Paper) => found?.probs[p.id];
@@ -118,8 +113,8 @@ export default function Page() {
   function exportCsv() {
     const score = (v: number | undefined) => (v === undefined || Number.isNaN(v) ? null : +v.toFixed(3));
     const rows = [
-      ['순위', '점수', '제목', '발표', '트랙', '분야', 'PDF', '링크', '초록'],
-      ...visible.map((p, i) => [i + 1, score(prob(p)), p.title, p.decision, p.track, p.topic, p.pdf, p.url, p.abstract]),
+      ['순위', '점수', '제목', '1저자', '발표', '트랙', '분야', 'PDF', '링크', '초록'],
+      ...visible.map((p, i) => [i + 1, score(prob(p)), p.title, p.author, p.decision, p.track, p.topic, p.pdf, p.url, p.abstract]),
     ];
     const slug = found!.query.replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 60).replace(/^-|-$/g, '');
     download(`${id}-${slug || 'papers'}.csv`, toCsv(rows));
@@ -130,14 +125,16 @@ export default function Page() {
     <div className="sky">
       <section className="sky-main">
         <header className="sky-head">
-          <Link href="/conferences" className="wordmark">Astrolabe</Link>
-          <h1>{name}</h1>
+          <Link href="/conferences" className="wordmark">Astrolabe <em>for your research</em></Link>
+          <div className="title-row">
+            <h1>{name}</h1>
+            {found && (
+              <p className="tally" aria-live="polite">
+                <b>{visible.length.toLocaleString()}</b> / {papers.length.toLocaleString()} 별이 남음
+              </p>
+            )}
+          </div>
           {conf?.titleOnly && <p className="title-only">초록이 아직 공개되지 않아 제목만으로 판정합니다 · 정확도가 낮습니다</p>}
-          {found && (
-            <p className="tally" aria-live="polite">
-              <b>{visible.length.toLocaleString()}</b> / {papers.length.toLocaleString()} 별이 남음{pending && ' · 판정 중'}
-            </p>
-          )}
         </header>
 
         <StarField papers={papers} states={states} />
@@ -152,7 +149,7 @@ export default function Page() {
             </label>
             <input type="text" name="q" autoComplete="off" aria-label="연구 주제"
               placeholder="찾고 싶은 연구 주제 (예: mechanistic interpretability of LLMs)" />
-            <button disabled={pending || !papers.length}>찾기</button>
+            <button disabled={pending || !papers.length}>{pending ? '판정 중…' : '찾기'}</button>
           </form>
           {errors > 0 && (
             <p className="err">
@@ -295,7 +292,7 @@ const Row = memo(function Row({ p, prob }: { p: Paper; prob?: number }) {
       <div>
         <a className="title" href={p.url} target="_blank" rel="noreferrer">{p.title}</a>
         <div className="meta">
-          {[p.decision, topicOf(p)].filter(Boolean).join(' · ')}
+          {[p.author, p.decision, topicOf(p)].filter(Boolean).join(' · ')}
           {p.pdf && <> · <a href={p.pdf} target="_blank" rel="noreferrer">PDF ↗</a></>}
         </div>
         {p.abstract && <details><summary>초록</summary><p>{p.abstract}</p></details>}
