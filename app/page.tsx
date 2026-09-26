@@ -32,7 +32,8 @@ export default function KeyPage() {
 
   return (
     <main className="narrow">
-      <h1><span className="wordmark">Find Papers</span></h1>
+      <span className="wordmark">Find Papers</span>
+      <h1 style={{ marginTop: 10 }}>학회 논문을 별자리로</h1>
       <p className="lede">학회 채택 논문 전체를 Jev가 초록 단위로 읽고, 내 연구 주제에 맞는 것만 남깁니다.</p>
 
       {keys.length > 0 && (
@@ -68,7 +69,6 @@ export default function KeyPage() {
           <button>키 저장하고 시작</button>
         </div>
       </form>
-      <p className="muted" style={{ marginTop: 24, fontSize: 13 }}>키는 이 브라우저에만 저장되고, 이 PC의 로컬 서버를 거쳐 Jev로만 전달됩니다.</p>
     </main>
   );
 }

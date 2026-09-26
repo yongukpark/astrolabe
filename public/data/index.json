@@ -1,22 +1,84 @@
 [
  {
-  "id": "neurips2025",
-  "name": "NeurIPS 2025",
-  "count": 5857
- },
- {
-  "id": "icml2025",
-  "name": "ICML 2025",
-  "count": 3339
+  "id": "iclr2024",
+  "conf": "iclr",
+  "year": 2024,
+  "name": "ICLR 2024",
+  "count": 2275,
+  "place": "Vienna",
+  "month": 5
  },
  {
   "id": "iclr2025",
   "name": "ICLR 2025",
-  "count": 3830
+  "count": 3830,
+  "conf": "iclr",
+  "year": 2025,
+  "place": "Singapore",
+  "month": 4
+ },
+ {
+  "id": "iclr2026",
+  "conf": "iclr",
+  "year": 2026,
+  "name": "ICLR 2026",
+  "count": 5353,
+  "place": "Rio de Janeiro",
+  "month": 4
+ },
+ {
+  "id": "icml2024",
+  "conf": "icml",
+  "year": 2024,
+  "name": "ICML 2024",
+  "count": 2634,
+  "place": "Vienna",
+  "month": 7
+ },
+ {
+  "id": "icml2025",
+  "name": "ICML 2025",
+  "count": 3339,
+  "conf": "icml",
+  "year": 2025,
+  "place": "Vancouver",
+  "month": 7
+ },
+ {
+  "id": "icml2026",
+  "conf": "icml",
+  "year": 2026,
+  "name": "ICML 2026",
+  "count": 6356,
+  "place": "Seoul",
+  "month": 7
  },
  {
   "id": "neurips2024",
   "name": "NeurIPS 2024",
-  "count": 4537
+  "count": 4537,
+  "conf": "neurips",
+  "year": 2024,
+  "place": "Vancouver",
+  "month": 12
+ },
+ {
+  "id": "neurips2025",
+  "name": "NeurIPS 2025",
+  "count": 5857,
+  "conf": "neurips",
+  "year": 2025,
+  "place": "San Diego",
+  "month": 12
+ },
+ {
+  "id": "neurips2026",
+  "conf": "neurips",
+  "year": 2026,
+  "name": "NeurIPS 2026",
+  "pending": "2026-12-06",
+  "note": "채택 8,856편 발표됨 · 초록은 아직 미공개",
+  "place": "Sydney",
+  "month": 12
  }
 ]

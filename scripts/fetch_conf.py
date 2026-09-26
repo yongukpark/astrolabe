@@ -1,8 +1,8 @@
-"""Conference virtual-site JSON -> public/data/<conf><year>.json (+ public/data/index.json)
+"""Accepted papers -> public/data/<conf><year>.json (+ public/data/index.json)
 
-OpenReview API blocks anonymous requests (challenge), so we use the <conf>.cc public dump.
-Works for neurips / iclr / icml (same miniconf platform).
-Usage: python3 scripts/fetch_conf.py neurips 2025
+neurips / iclr / icml: the <conf>.cc virtual-site dump (OpenReview's API blocks anonymous requests).
+  Recent dumps ship without abstracts; those are filled from papercopilot/paperlists by OpenReview id or title.
+Usage: python3 scripts/fetch_conf.py icml 2026    (stdlib only)
 """
 import json
 import re
@@ -13,6 +13,14 @@ from pathlib import Path
 NAMES = {"neurips": "NeurIPS", "iclr": "ICLR", "icml": "ICML"}
 RANK = {"oral": 3, "spotlight": 2, "poster": 1, None: 0}
 DATA = Path(__file__).resolve().parent.parent / "public/data"
+
+
+def get(url):
+    return urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=120).read()
+
+
+def norm(title):
+    return re.sub(r"\W+", " ", title).strip().lower()
 
 
 def decision(e):
@@ -29,6 +37,25 @@ def track(e):
             "Position_Paper_Track": "Position"}.get(m.group(1), m.group(1))
 
 
+def fill_abstracts(raw, conf, year):
+    """Dumps published before the conference have no abstracts; borrow them from paperlists."""
+    folder = "nips" if conf == "neurips" else conf
+    path = f"papercopilot/paperlists/main/{folder}/{folder}{year}.json"
+    for url in (f"https://media.githubusercontent.com/media/{path}", f"https://raw.githubusercontent.com/{path}"):  # big files are LFS
+        try:
+            pl = json.loads(get(url))
+            break
+        except Exception as err:
+            print(f"paperlists {folder}{year}: {err} ({url.split('/')[2]})")
+    else:
+        return
+    by_id = {x["id"]: x["abstract"] for x in pl if x.get("abstract")}
+    by_title = {norm(x["title"]): x["abstract"] for x in pl if x.get("abstract")}
+    for e in raw:
+        forum = re.search(r"forum\?id=([\w-]+)", e.get("paper_url") or "")
+        e["abstract"] = (forum and by_id.get(forum.group(1))) or by_title.get(norm(e["name"]))
+
+
 def normalize(raw):
     papers = {}
     for e in raw:
@@ -37,7 +64,7 @@ def normalize(raw):
         paper_url = e.get("paper_url") or ""
         forum = re.search(r"openreview\.net/forum\?id=([\w-]{8,12})$", paper_url)  # oral events carry fake ids like 2025-Oral--9558-…
         # orals appear up to 3x (Oral/Poster events, some without an OpenReview link), cdmx repeats too → dedupe by title
-        key = re.sub(r"\W+", " ", e["name"]).strip().lower()
+        key = norm(e["name"])
         if forum:
             pdf, url = f"https://openreview.net/pdf?id={forum.group(1)}", f"https://openreview.net/forum?id={forum.group(1)}"
         elif "proceedings.neurips.cc" in paper_url:  # NeurIPS ≤2024 links the proceedings page instead
@@ -65,26 +92,31 @@ def normalize(raw):
     return list(papers.values())
 
 
-def main():
-    conf, year = sys.argv[1].lower(), sys.argv[2]
+def fetch_miniconf(conf, year):
     host = f"{conf}.cc"
-    req = urllib.request.Request(f"https://{host}/static/virtual/data/{conf}-{year}-orals-posters.json",
-                                 headers={"User-Agent": "Mozilla/5.0"})
-    raw = json.load(urllib.request.urlopen(req))["results"]
+    raw = json.loads(get(f"https://{host}/static/virtual/data/{conf}-{year}-orals-posters.json"))["results"]
     for e in raw:
         e["_host"] = host
-    papers = normalize(raw)
+    if sum(bool(e.get("abstract")) for e in raw) < len(raw) / 2:
+        fill_abstracts(raw, conf, year)
+    return normalize(raw), len(raw)
+
+
+def main():
+    conf, year = sys.argv[1].lower(), int(sys.argv[2])
+    papers, n_raw = fetch_miniconf(conf, year)
     if not papers:
-        sys.exit(f"{conf} {year}: dump has no abstracts, skipped")
+        sys.exit(f"{conf} {year}: no papers with abstracts, skipped")
     cid = f"{conf}{year}"
     DATA.mkdir(parents=True, exist_ok=True)
     (DATA / f"{cid}.json").write_text(json.dumps(papers, ensure_ascii=False))
 
     index_file = DATA / "index.json"
     index = {c["id"]: c for c in (json.loads(index_file.read_text()) if index_file.exists() else [])}
-    index[cid] = {"id": cid, "name": f"{NAMES.get(conf, conf.upper())} {year}", "count": len(papers)}
-    index_file.write_text(json.dumps(sorted(index.values(), key=lambda c: c["id"][-4:] + c["id"], reverse=True), indent=1))
-    print(f"{len(raw)} events -> {len(papers)} papers -> {cid}.json")
+    old = {k: v for k, v in index.get(cid, {}).items() if k not in ("pending", "note")}  # keep hand-set place/month
+    index[cid] = {**old, "id": cid, "conf": conf, "year": year, "name": f"{NAMES.get(conf, conf.upper())} {year}", "count": len(papers)}
+    index_file.write_text(json.dumps(sorted(index.values(), key=lambda c: (c["conf"], c["year"])), indent=1, ensure_ascii=False))
+    print(f"{n_raw} raw -> {len(papers)} papers -> {cid}.json")
 
 
 if __name__ == "__main__":

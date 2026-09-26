@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { download, toCsv } from '../../../lib/csv';
 import { loadKey, type Key } from '../../../lib/key';
+import { Matrix, useConfs } from '../../Matrix';
 
 type Paper = {
   id: string; title: string; abstract: string; pdf: string | null; url: string;
@@ -21,7 +22,8 @@ export default function Page() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [key, setKey] = useState<Key | null>(null);
-  const [name, setName] = useState('');
+  const confs = useConfs();
+  const name = confs.find((c) => c.id === id)?.name ?? '';
   const [lastError, setLastError] = useState('');
   const [papers, setPapers] = useState<Paper[]>([]);
   const [rounds, setRounds] = useState<Round[]>([]);
@@ -33,8 +35,6 @@ export default function Page() {
     if (!k) return router.replace('/');
     setKey(k);
     fetch(`/data/${id}.json`).then((r) => r.json()).then(setPapers);
-    fetch('/data/index.json').then((r) => r.json())
-      .then((cs: { id: string; name: string }[]) => setName(cs.find((c) => c.id === id)?.name ?? id));
   }, [id, router]);
 
   const passes = (p: Paper, r: Round) => {
@@ -57,7 +57,7 @@ export default function Page() {
     : rounds.length === 1 && pending ? visible.filter((p) => rounds[0].probs[p.id] !== undefined)
     : visible;
 
-  // per-paper state for the dot field, in file order: -1 idle, -2 waiting for Jev, -3 filtered out, else P(relevant)
+  // per-paper state for the star field, in file order: -1 idle, -2 waiting for Jev, -3 filtered out, else P(relevant)
   const states = useMemo(() => {
     const last = rounds.at(-1);
     return Float32Array.from(papers, (p) => {
@@ -132,119 +132,176 @@ export default function Page() {
 
   if (!key) return null;
   return (
-    <main>
-      <nav className="top">
-        <Link href="/conferences" className="wordmark">Find Papers</Link>
-        <Link href="/conferences">학회 바꾸기</Link>
-      </nav>
-      <h1>{name}</h1>
+    <div className="sky">
+      <section className="sky-main">
+        <header className="sky-head">
+          <Link href="/conferences" className="wordmark">Find Papers</Link>
+          <h1>{name}</h1>
+          <p className="tally" aria-live="polite">
+            {rounds.length ? <><b>{visible.length.toLocaleString()}</b> / {papers.length.toLocaleString()} 별이 남음</> : <>{papers.length.toLocaleString()} 편의 논문</>}
+            {pending && ' · 판정 중'}
+          </p>
+        </header>
 
-      <DotField states={states} />
+        <StarField papers={papers} states={states} />
 
-      <div className="stats">
-        <span className="count" aria-live="polite">{visible.length.toLocaleString()}</span>
-        <span className="of">/ {papers.length.toLocaleString()}편{pending && ' · 판정 중'}</span>
-        <label className="threshold">
-          기준값
-          <input type="range" min={0} max={1} step={0.05} value={threshold}
-            onChange={(e) => setThreshold(+e.target.value)} />
-          <span className="mono">{threshold.toFixed(2)}</span>
-        </label>
-      </div>
-
-      <form onSubmit={search} className="search">
-        <input
-          type="text"
-          name="q"
-          autoComplete="off"
-          aria-label="연구 주제"
-          placeholder={rounds.length ? '남은 논문에서 더 좁혀보기' : '찾고 싶은 연구 주제 (예: mechanistic interpretability of LLMs)'}
-        />
-        <button disabled={pending || !papers.length}>{rounds.length ? '좁히기' : '찾기'}</button>
-      </form>
-
-      {rounds.length > 0 && (
-        <div className="trail">
-          {rounds.map((r, i) => (
-            <span key={i}>{i > 0 && <span className="arrow">→ </span>}<span className="step">{r.query}</span></span>
-          ))}
-          <button type="button" className="ghost" disabled={pending || !visible.length} onClick={exportCsv}>
-            CSV로 내보내기 ({visible.length.toLocaleString()}편)
-          </button>
-          <button type="button" className="ghost" disabled={pending}
-            onClick={() => { setRounds([]); setErrors(0); setLastError(''); }}>처음부터</button>
+        <div className="sky-controls">
+          <form onSubmit={search} className="search">
+            <input
+              type="text"
+              name="q"
+              autoComplete="off"
+              aria-label="연구 주제"
+              placeholder={rounds.length ? '남은 별에서 더 좁혀보기' : '찾고 싶은 연구 주제 (예: mechanistic interpretability of LLMs)'}
+            />
+            <button disabled={pending || !papers.length}>{rounds.length ? '좁히기' : '찾기'}</button>
+          </form>
+          {rounds.length > 0 && (
+            <div className="trail">
+              {rounds.map((r, i) => (
+                <span key={i}>{i > 0 && <span className="arrow">→ </span>}<span className="step">{r.query}</span></span>
+              ))}
+            </div>
+          )}
+          {errors > 0 && (
+            <p className="err">
+              {lastError} — 판정하지 못한 묶음 {errors}개는 목록에 남겨두었습니다.
+              {lastError.includes('키') && <> <Link href="/">키 바꾸기</Link></>}
+            </p>
+          )}
+          <div className="sky-foot">
+            <Matrix confs={confs} current={id} compact />
+            <label className="threshold">
+              기준값
+              <input type="range" min={0} max={1} step={0.05} value={threshold}
+                onChange={(e) => setThreshold(+e.target.value)} />
+              <span className="num">{threshold.toFixed(2)}</span>
+            </label>
+          </div>
         </div>
-      )}
-      {errors > 0 && (
-        <p className="err">
-          {lastError} — 판정하지 못한 묶음 {errors}개는 목록에 남겨두었습니다.
-          {lastError.includes('키') && <> <Link href="/">키 바꾸기</Link></>}
-        </p>
-      )}
+      </section>
 
-      {rounds.length === 0 ? null : done && visible.length === 0 ? (
-        <p className="empty">기준값 {threshold.toFixed(2)}을 넘는 논문이 없습니다. 기준값을 낮추거나 주제를 넓혀 보세요.</p>
-      ) : (
-        <ul className="papers">
-          {listed.map((p) => <Row key={p.id} p={p} prob={last?.probs[p.id]} />)}
-        </ul>
-      )}
-    </main>
+      <aside className="sky-panel" aria-label="남은 논문">
+        <div className="panel-head">
+          <span>{rounds.length ? '가장 밝은 별' : '검색하면 여기에 남은 논문이 나옵니다'}</span>
+          {rounds.length > 0 && (
+            <span className="panel-actions">
+              <button type="button" className="ghost" disabled={pending || !visible.length} onClick={exportCsv}>CSV</button>
+              <button type="button" className="ghost" disabled={pending}
+                onClick={() => { setRounds([]); setErrors(0); setLastError(''); }}>처음부터</button>
+            </span>
+          )}
+        </div>
+        {done && visible.length === 0 ? (
+          <p className="empty">기준값 {threshold.toFixed(2)}을 넘는 논문이 없습니다. 기준값을 낮추거나 주제를 넓혀 보세요.</p>
+        ) : (
+          <ul className="papers">
+            {listed.map((p) => <Row key={p.id} p={p} prob={last?.probs[p.id]} />)}
+          </ul>
+        )}
+      </aside>
+    </div>
   );
 }
 
-// The whole conference as dots, one per paper. Survivors stay inked and highlighted; the rest fade as Jev answers.
-function DotField({ states }: { states: Float32Array }) {
+const topicOf = (p: Paper) => p.topic?.split('->')[0] ?? '미분류';
+// labels for narrow screens
+const SHORT: Record<string, string> = {
+  'General Machine Learning': 'GENERAL ML', 'Reinforcement Learning': 'RL', 'Probabilistic Methods': 'PROBABILISTIC',
+  'Computer Vision': 'VISION', 'Data-centric AI': 'DATA-CENTRIC', 'Social Aspects': 'SOCIAL', 'Deep Learning': 'DEEP LEARNING',
+};
+
+// Every paper is a star, grouped into constellations by the conference's own top-level topic.
+// Survivors glow; each constellation's label shows how many of its stars survived.
+function StarField({ papers, states }: { papers: Paper[]; states: Float32Array }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const [width, setWidth] = useState(0);
+  const [size, setSize] = useState({ w: 0, h: 0 });
 
   useEffect(() => {
     const el = ref.current!;
-    const ro = new ResizeObserver(() => setWidth(el.clientWidth));
+    const ro = new ResizeObserver(() => setSize({ w: el.clientWidth, h: el.clientHeight }));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
+  // constellations: topics largest first, each paper's slot within its topic
+  const groups = useMemo(() => {
+    const by = new Map<string, number[]>();
+    papers.forEach((p, i) => by.set(topicOf(p), [...(by.get(topicOf(p)) ?? []), i]));
+    return [...by.entries()].sort((a, b) => b[1].length - a[1].length);
+  }, [papers]);
+
   useEffect(() => {
     const c = ref.current;
-    const n = states.length;
-    if (!c || !width || !n) return;
-    const h = c.clientHeight, dpr = window.devicePixelRatio || 1;
-    c.width = width * dpr;
+    const { w, h } = size;
+    if (!c || !w || !groups.length) return;
+    const dpr = window.devicePixelRatio || 1;
+    c.width = w * dpr;
     c.height = h * dpr;
     const ctx = c.getContext('2d')!;
     ctx.scale(dpr, dpr);
     const css = getComputedStyle(c);
     const color = (v: string) => css.getPropertyValue(v).trim();
-    const [ink, muted, line, mark] = ['--ink', '--muted', '--line', '--mark'].map(color);
+    const [star, pendingC, out, gold, dim, fg] = ['--star', '--star-wait', '--star-out', '--gold', '--dim', '--fg'].map(color);
 
-    const cols = Math.ceil(width / Math.sqrt((width * h) / n));
-    const cw = width / cols, ch = h / Math.ceil(n / cols);
-    const r = Math.max(0.9, Math.min(cw, ch) * 0.34);
-    const dot = (i: number, rad: number) => {
-      ctx.beginPath();
-      ctx.arc(((i % cols) + 0.5) * cw, (Math.floor(i / cols) + 0.5) * ch, rad, 0, 7);
-      ctx.fill();
-    };
-    for (let i = 0; i < n; i++) {
-      const s = states[i];
-      if (s >= 0) continue; // survivors drawn last, on top
-      ctx.globalAlpha = s === -3 ? 1 : s === -2 ? 0.55 : 0.3;
-      ctx.fillStyle = s === -3 ? line : muted;
-      dot(i, r);
-    }
-    ctx.globalAlpha = 1;
-    for (let i = 0; i < n; i++) {
-      if (states[i] < 0) continue;
-      ctx.fillStyle = mark;
-      dot(i, r * 2.1);
-      ctx.fillStyle = ink;
-      dot(i, r);
-    }
-  }, [states, width]);
+    // lay constellations on a grid, radius by sqrt(size)
+    const k = groups.length;
+    const cols = Math.max(1, Math.round(Math.sqrt((k * w) / h)));
+    const rows = Math.ceil(k / cols);
+    const cw = w / cols, ch = h / rows;
+    const max = groups[0][1].length;
+    const rMax = Math.min(cw, ch) * 0.36;
+    const judged = states.some((s) => s !== -1);
 
-  const kept = states.reduce((a, s) => a + (s >= 0 ? 1 : 0), 0);
-  return <canvas ref={ref} className="field" role="img" aria-label={`전체 ${states.length}편 중 ${kept}편이 남았습니다`} />;
+    groups.forEach(([topic, idx], g) => {
+      const cx = (g % cols + 0.5) * cw + (hash(topic) - 0.5) * cw * 0.12;
+      const cy = (Math.floor(g / cols) + 0.55) * ch + (hash(topic + 'y') - 0.5) * ch * 0.1;
+      const R = rMax * Math.max(0.45, Math.sqrt(idx.length / max));
+      let lit = 0;
+      // sunflower spiral: even, organic spread
+      idx.forEach((pi, j) => {
+        const r = R * Math.sqrt((j + 0.5) / idx.length), th = j * 2.39996;
+        const x = cx + Math.cos(th) * r, y = cy + Math.sin(th) * r * 0.82;
+        const s = states[pi];
+        if (s >= 0) {
+          lit++;
+          ctx.fillStyle = gold;
+          ctx.shadowColor = gold;
+          ctx.shadowBlur = 6 + 10 * s;
+          dot(ctx, x, y, 1.6 + 2 * s);
+          ctx.shadowBlur = 0;
+        } else {
+          ctx.fillStyle = s === -3 ? out : s === -2 ? pendingC : star;
+          dot(ctx, x, y, hash(pi + '') < 0.25 ? 1.5 : 1);
+        }
+      });
+      ctx.font = '12px "Chakra Petch", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = lit ? fg : dim;
+      const full = topic.toUpperCase();
+      ctx.fillText(ctx.measureText(full).width < cw - 8 ? full : SHORT[topic] ?? full.split(' ').map((w) => w[0]).join(''), cx, cy - R * 0.82 - 14);
+      if (judged) {
+        ctx.fillStyle = lit ? gold : dim;
+        ctx.fillText(`${lit} / ${idx.length}`, cx, cy - R * 0.82 - 1);
+      }
+    });
+  }, [groups, states, size]);
+
+  const lit = states.reduce((a, s) => a + (s >= 0 ? 1 : 0), 0);
+  return <canvas ref={ref} className="stars" role="img" aria-label={`논문 ${states.length}편 중 ${lit}편이 빛나고 있습니다`} />;
+}
+
+function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, 7);
+  ctx.fill();
+}
+
+// stable 0..1 per string, for small deterministic jitter
+function hash(s: string) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return (h >>> 0) / 4294967296;
 }
 
 // memo: a streamed batch re-renders only the rows whose prob changed
@@ -252,14 +309,11 @@ const Row = memo(function Row({ p, prob }: { p: Paper; prob?: number }) {
   const judged = prob !== undefined && !Number.isNaN(prob);
   return (
     <li className="paper">
-      <span className="prob" style={{ '--p': judged ? prob : 0 } as React.CSSProperties}>{judged ? prob.toFixed(2) : ''}</span>
+      <span className="prob">{judged ? prob.toFixed(2) : ''}</span>
       <div>
         <a className="title" href={p.url} target="_blank" rel="noreferrer">{p.title}</a>
         <div className="meta">
-          {p.track}
-          {p.decision && <> · <span className={`tag ${p.decision}`}>{p.decision}</span></>}
-          {p.workshop && ` · ${p.workshop}`}
-          {p.topic && ` · ${p.topic}`}
+          {[p.decision, topicOf(p)].filter(Boolean).join(' · ')}
           {p.pdf && <> · <a href={p.pdf} target="_blank" rel="noreferrer">PDF ↗</a></>}
         </div>
         <details><summary>초록</summary><p>{p.abstract}</p></details>
