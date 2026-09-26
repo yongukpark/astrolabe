@@ -7,6 +7,10 @@
 </p>
 
 <p align="center">
+  <b>한국어</b> · <a href="README.en.md">English</a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/NeurIPS%20·%20ICLR%20·%20ICML-2024–2026-ffd27a?labelColor=0a0f1e" alt="conferences">
   <img src="https://img.shields.io/badge/model-Jev-9db4ff?labelColor=0a0f1e" alt="model">
   <img src="https://img.shields.io/badge/runs-locally-8a93a8?labelColor=0a0f1e" alt="local">
