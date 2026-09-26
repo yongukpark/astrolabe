@@ -154,7 +154,7 @@ def main():
 
     index_file = DATA / "index.json"
     index = {c["id"]: c for c in (json.loads(index_file.read_text()) if index_file.exists() else [])}
-    old = {k: v for k, v in index.get(cid, {}).items() if k not in ("pending", "note", "titleOnly")}  # keep hand-set place/month
+    old = {k: v for k, v in index.get(cid, {}).items() if k not in ("pending", "note", "titleOnly")}  # keep hand-set month
     index[cid] = {**old, "id": cid, "conf": conf, "year": year, "name": f"{NAMES.get(conf, conf.upper())} {year}", "count": len(papers)}
     if title_only:
         index[cid]["titleOnly"] = True

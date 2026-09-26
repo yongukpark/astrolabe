@@ -5,7 +5,6 @@
   "year": 2024,
   "name": "ICLR 2024",
   "count": 2275,
-  "place": "Vienna",
   "month": 5
  },
  {
@@ -14,7 +13,6 @@
   "count": 3830,
   "conf": "iclr",
   "year": 2025,
-  "place": "Singapore",
   "month": 4
  },
  {
@@ -23,7 +21,6 @@
   "year": 2026,
   "name": "ICLR 2026",
   "count": 5353,
-  "place": "Rio de Janeiro",
   "month": 4
  },
  {
@@ -32,7 +29,6 @@
   "year": 2024,
   "name": "ICML 2024",
   "count": 2634,
-  "place": "Vienna",
   "month": 7
  },
  {
@@ -41,7 +37,6 @@
   "count": 3339,
   "conf": "icml",
   "year": 2025,
-  "place": "Vancouver",
   "month": 7
  },
  {
@@ -50,7 +45,6 @@
   "year": 2026,
   "name": "ICML 2026",
   "count": 6356,
-  "place": "Seoul",
   "month": 7
  },
  {
@@ -59,7 +53,6 @@
   "count": 4537,
   "conf": "neurips",
   "year": 2024,
-  "place": "Vancouver",
   "month": 12
  },
  {
@@ -68,7 +61,6 @@
   "count": 5857,
   "conf": "neurips",
   "year": 2025,
-  "place": "San Diego",
   "month": 12
  },
  {
@@ -76,7 +68,6 @@
   "conf": "neurips",
   "year": 2026,
   "name": "NeurIPS 2026",
-  "place": "Sydney",
   "month": 12,
   "count": 8856,
   "titleOnly": true

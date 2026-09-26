@@ -34,7 +34,7 @@ npm run dev        # http://localhost:3000
 | ICLR 2026 · ICML 2026 초록 보강 | [papercopilot/paperlists](https://github.com/papercopilot/paperlists) | 공식 데이터에 초록이 없는 경우에만 사용. 해당 저장소에는 라이선스가 명시되어 있지 않음 |
 | NeurIPS 2026 | 공식 공개 데이터 (2026-09-26 받음) | 초록·분야 미공개라 **제목만으로 판정** (NeurIPS 2025 실측 F1 0.60, 초록 포함 시 0.88). 초록이 공개되면 다시 받으면 됨 |
 | 논문 링크 · PDF | [OpenReview](https://openreview.net), [NeurIPS Proceedings](https://proceedings.neurips.cc) | 링크만 저장하며 PDF는 저장하지 않음 |
-| 개최 도시 · 시기 | 각 학회 공식 사이트 | `public/data/index.json`에 수기 입력 |
+| 개최 시기 (월) | 각 학회 공식 사이트 | `public/data/index.json`에 수기 입력 |
 
 데이터 다시 받기:
 

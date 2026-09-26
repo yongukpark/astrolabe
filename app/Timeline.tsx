@@ -32,13 +32,13 @@ export function Timeline({ confs }: { confs: Conf[] }) {
             <div className="tl-orbit">
               {confs.filter((c) => c.conf === conf).map((c) => {
                 const d = c.pending ? 40 : 18 + 34 * Math.sqrt((c.count ?? 0) / max);
-                const label = <><b>{c.pending ? c.pending.slice(5).replace('-', '.') : c.count!.toLocaleString()}</b><small>{c.place}</small>{c.titleOnly && <small className="tl-tag">제목만</small>}</>;
+                const label = <><b>{c.pending ? c.pending.slice(5).replace('-', '.') : c.count!.toLocaleString()}</b>{c.titleOnly && <small className="tl-tag">제목만</small>}</>;
                 return c.pending ? (
                   <span key={c.id} className="tl-planet pending" style={{ left: x(c.year, c.month!) }} title={c.note}>
                     <i style={{ width: d, height: d, marginTop: -d / 2 }} />{label}
                   </span>
                 ) : (
-                  <Link key={c.id} href={`/conferences/${c.id}`} className="tl-planet" style={{ left: x(c.year, c.month!) }} aria-label={`${c.name}, ${c.place}, ${c.count}편`}>
+                  <Link key={c.id} href={`/conferences/${c.id}`} className="tl-planet" style={{ left: x(c.year, c.month!) }} aria-label={`${c.name}, ${c.count}편`}>
                     <i style={{ width: d, height: d, marginTop: -d / 2 }} />{label}
                   </Link>
                 );
