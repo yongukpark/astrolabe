@@ -83,12 +83,12 @@ main.wide { max-width: 760px; padding-top: 8vh; }
 .tally { font: 15px var(--display); color: var(--muted); }
 .tally b { color: var(--gold); font-weight: 400; }
 .stars { flex: 1; min-height: 300px; width: 100%; display: block; }
-.sky-controls { display: flex; flex-direction: column; gap: 10px; max-width: 760px; }
-.search { display: flex; gap: 8px; margin: 0; }
-.trail { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; }
-.trail .step { padding: 3px 12px; border: 1px solid var(--line); border-radius: 999px; }
-.trail .arrow { color: var(--dim); }
-.sky-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.sky-controls { display: flex; flex-direction: column; gap: 10px; }
+.sky-controls .search { width: min(900px, 100%); align-self: center; align-items: center; }
+.sky-controls .matrix { align-self: flex-start; }
+.search { display: flex; gap: 12px; margin: 0; }
+.search .threshold { flex: none; }
+.search .threshold input { width: 110px; }
 .threshold { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
 .num { font-family: var(--display); }
 .err { color: var(--danger); font-size: 14px; }
@@ -96,7 +96,6 @@ main.wide { max-width: 760px; padding-top: 8vh; }
 .sky-panel { overflow-y: auto; background: var(--panel); border-left: 1px solid var(--line); padding: 24px 24px 60px; }
 .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px;
   font: 12px var(--display); letter-spacing: 0.08em; color: var(--muted); }
-.panel-actions { display: flex; gap: 6px; }
 .empty { padding: 24px 0; color: var(--muted); }
 .papers { list-style: none; padding: 0; margin: 0; }
 .paper { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line);
@@ -128,6 +127,7 @@ main.observatory { max-width: 1240px; margin: 0 auto; padding: 40px 32px 60px; m
 .timeline { position: relative; width: 100%; min-width: 760px; padding: 40px 70px 10px 110px; }
 .tl-axis { position: absolute; left: 110px; right: 70px; top: 0; bottom: 0; }
 .tl-year { position: absolute; top: 0; transform: translateX(-50%); font: 14px var(--display); color: var(--dim); }
+.tl-divider { position: absolute; top: 28px; bottom: 0; border-left: 1px solid var(--line); opacity: .45; }
 .tl-today { position: absolute; top: 28px; bottom: 0; border-left: 1px dashed var(--gold); opacity: .6; }
 .tl-row { position: relative; height: 170px; display: flex; align-items: center; }
 .tl-name { position: absolute; left: -110px; font: 20px var(--display); color: var(--muted); }
@@ -140,3 +140,5 @@ a.tl-planet:hover i, a.tl-planet:focus-visible i { background: var(--gold); box-
 a.tl-planet:hover b { color: var(--gold); }
 .tl-planet.pending i { background: transparent; border: 1px dashed var(--dim); }
 .tl-planet.pending b { color: var(--gold); }
+.tl-tag { font-size: 11px; color: var(--gold); border: 1px solid rgba(255, 210, 122, .4); border-radius: 999px; padding: 0 7px; }
+.title-only { font-size: 13px; color: var(--gold); }

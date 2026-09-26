@@ -21,6 +21,9 @@ export function Timeline({ confs }: { confs: Conf[] }) {
           {Array.from({ length: years }, (_, i) => (
             <span key={i} className="tl-year" style={{ left: x(y0 + i, 6.5) }}>{y0 + i}</span>
           ))}
+          {Array.from({ length: years - 1 }, (_, i) => (
+            <span key={`d${i}`} className="tl-divider" style={{ left: x(y0 + i + 1, 0.5) }} />
+          ))}
           {now.getFullYear() - y0 < years && <span className="tl-today" style={{ left: today }} />}
         </div>
         {ROWS.map(([conf, name]) => (
@@ -29,7 +32,7 @@ export function Timeline({ confs }: { confs: Conf[] }) {
             <div className="tl-orbit">
               {confs.filter((c) => c.conf === conf).map((c) => {
                 const d = c.pending ? 40 : 18 + 34 * Math.sqrt((c.count ?? 0) / max);
-                const label = <><b>{c.pending ? c.pending.slice(5).replace('-', '.') : c.count!.toLocaleString()}</b><small>{c.place}</small></>;
+                const label = <><b>{c.pending ? c.pending.slice(5).replace('-', '.') : c.count!.toLocaleString()}</b><small>{c.place}</small>{c.titleOnly && <small className="tl-tag">제목만</small>}</>;
                 return c.pending ? (
                   <span key={c.id} className="tl-planet pending" style={{ left: x(c.year, c.month!) }} title={c.note}>
                     <i style={{ width: d, height: d, marginTop: -d / 2 }} />{label}

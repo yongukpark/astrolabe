@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 export type Conf = {
   id: string; conf: string; year: number; name: string; count?: number;
-  place?: string; month?: number; pending?: string; note?: string;
+  place?: string; month?: number; pending?: string; note?: string; titleOnly?: boolean;
 };
 
 const ROWS: [string, string][] = [['neurips', 'NeurIPS'], ['iclr', 'ICLR'], ['icml', 'ICML']];

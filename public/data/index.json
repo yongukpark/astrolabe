@@ -76,9 +76,9 @@
   "conf": "neurips",
   "year": 2026,
   "name": "NeurIPS 2026",
-  "pending": "2026-12-06",
-  "note": "채택 8,856편 발표됨 · 초록은 아직 미공개",
   "place": "Sydney",
-  "month": 12
+  "month": 12,
+  "count": 8856,
+  "titleOnly": true
  }
 ]

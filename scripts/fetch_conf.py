@@ -2,7 +2,8 @@
 
 neurips / iclr / icml: the <conf>.cc virtual-site dump (OpenReview's API blocks anonymous requests).
   Recent dumps ship without abstracts; those are filled from papercopilot/paperlists by OpenReview id or title.
-Usage: python3 scripts/fetch_conf.py icml 2026    (stdlib only)
+If neither has abstracts yet (e.g. NeurIPS right after decisions), papers are kept title-only and marked in index.json.
+Usage: python3 scripts/fetch_conf.py icml 2026 [local-dump.json]    (stdlib only)
 """
 import json
 import re
@@ -56,10 +57,10 @@ def fill_abstracts(raw, conf, year):
         e["abstract"] = (forum and by_id.get(forum.group(1))) or by_title.get(norm(e["name"]))
 
 
-def normalize(raw):
+def normalize(raw, title_only=False):
     papers = {}
     for e in raw:
-        if not e.get("abstract"):
+        if not e.get("abstract") and not title_only:
             continue
         paper_url = e.get("paper_url") or ""
         forum = re.search(r"openreview\.net/forum\?id=([\w-]{8,12})$", paper_url)  # oral events carry fake ids like 2025-Oral--9558-…
@@ -74,7 +75,7 @@ def normalize(raw):
         p = {
             "id": forum.group(1) if forum else key,
             "title": e["name"].strip(),
-            "abstract": e["abstract"].strip(),
+            "abstract": (e.get("abstract") or "").strip(),
             "pdf": pdf,
             "url": url,
             "track": track(e),
@@ -92,19 +93,21 @@ def normalize(raw):
     return list(papers.values())
 
 
-def fetch_miniconf(conf, year):
+def fetch_miniconf(conf, year, local=None):
     host = f"{conf}.cc"
-    raw = json.loads(get(f"https://{host}/static/virtual/data/{conf}-{year}-orals-posters.json"))["results"]
+    dump = Path(local).read_bytes() if local else get(f"https://{host}/static/virtual/data/{conf}-{year}-orals-posters.json")
+    raw = json.loads(dump)["results"]
     for e in raw:
         e["_host"] = host
     if sum(bool(e.get("abstract")) for e in raw) < len(raw) / 2:
         fill_abstracts(raw, conf, year)
-    return normalize(raw), len(raw)
+    title_only = sum(bool(e.get("abstract")) for e in raw) < len(raw) / 2
+    return normalize(raw, title_only), len(raw), title_only
 
 
 def main():
     conf, year = sys.argv[1].lower(), int(sys.argv[2])
-    papers, n_raw = fetch_miniconf(conf, year)
+    papers, n_raw, title_only = fetch_miniconf(conf, year, sys.argv[3] if len(sys.argv) > 3 else None)
     if not papers:
         sys.exit(f"{conf} {year}: no papers with abstracts, skipped")
     cid = f"{conf}{year}"
@@ -113,10 +116,12 @@ def main():
 
     index_file = DATA / "index.json"
     index = {c["id"]: c for c in (json.loads(index_file.read_text()) if index_file.exists() else [])}
-    old = {k: v for k, v in index.get(cid, {}).items() if k not in ("pending", "note")}  # keep hand-set place/month
+    old = {k: v for k, v in index.get(cid, {}).items() if k not in ("pending", "note", "titleOnly")}  # keep hand-set place/month
     index[cid] = {**old, "id": cid, "conf": conf, "year": year, "name": f"{NAMES.get(conf, conf.upper())} {year}", "count": len(papers)}
+    if title_only:
+        index[cid]["titleOnly"] = True
     index_file.write_text(json.dumps(sorted(index.values(), key=lambda c: (c["conf"], c["year"])), indent=1, ensure_ascii=False))
-    print(f"{n_raw} raw -> {len(papers)} papers -> {cid}.json")
+    print(f"{n_raw} raw -> {len(papers)} papers -> {cid}.json" + (" (title-only: no abstracts yet)" if title_only else ""))
 
 
 if __name__ == "__main__":

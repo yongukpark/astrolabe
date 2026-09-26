@@ -47,7 +47,8 @@ export async function POST(req: Request) {
           `p${i}`,
           {
             type: 'noul',
-            instructions: `Is this paper relevant to the researcher's interest described in the state?\n\nTitle: ${p.title}\n\nAbstract: ${p.abstract}`,
+            // title-only conferences (abstracts not public yet) send just the title
+            instructions: `Is this paper relevant to the researcher's interest described in the state?\n\nTitle: ${p.title}` + (p.abstract ? `\n\nAbstract: ${p.abstract}` : ''),
           },
         ]),
       ),
