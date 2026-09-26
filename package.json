@@ -1,5 +1,5 @@
 {
-  "name": "find-papers",
+  "name": "astrolabe",
   "private": true,
   "scripts": {
     "dev": "next dev",
