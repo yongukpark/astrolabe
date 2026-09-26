@@ -63,29 +63,9 @@ npm run dev        # http://localhost:3000
 - 검색할 때 내 PC의 로컬 서버(`/api/judge`)를 거쳐 Jev 제공자에게만 전달되고, 저장하거나 기록하지 않습니다.
 - 이 서버를 공개 배포하면 다른 사람의 키가 배포자 서버를 지나가게 되므로, 각자 로컬에서 실행하는 것을 전제로 합니다.
 
-## 데이터 출처
+## 데이터 출처와 권리
 
-| 데이터 | 출처 | 비고 |
-|---|---|---|
-| 채택 논문 목록 · 제목 · 저자 · 초록 · 발표 형태 · 분야 | 각 학회 공식 사이트의 공개 데이터<br>`neurips.cc` · `iclr.cc` · `icml.cc` `/static/virtual/data/<학회>-<연도>-orals-posters.json` | 수집: `scripts/fetch_conf.py` |
-| ICLR 2026 · ICML 2026 초록 보강 | [papercopilot/paperlists](https://github.com/papercopilot/paperlists) | 공식 데이터에 초록이 없는 경우에만 사용. 해당 저장소에는 라이선스가 명시되어 있지 않음 |
-| NeurIPS 2026 | 공식 공개 데이터 (2026-09-26 받음) | 초록 · 분야 · PDF 미공개. 공개되면 다시 받으면 됨 |
-| 논문 링크 · PDF | [OpenReview](https://openreview.net), [NeurIPS Proceedings](https://proceedings.neurips.cc) | 링크만 저장하며 PDF는 저장하지 않음 |
-| 개최 시기 (월) | 각 학회 공식 사이트 | `public/data/index.json`에 수기 입력 |
-
-논문 데이터(제목 · 초록 등)는 **이 저장소에 포함되어 있지 않습니다.** `npm run data`가 위 공개 출처에서 각자의 PC로 직접 받습니다. 저장소에는 학회 목록(`public/data/index.json`)과 수집 스크립트만 있습니다.
-
-```bash
-npm run data                                     # public/data/index.json의 학회 전부
-python3 scripts/fetch_conf.py neurips 2025       # 한 학회만
-python3 scripts/fetch_conf.py neurips 2026 data/raw/neurips-2026-orals-posters.json   # 받아 둔 파일로
-```
-
-## 권리 고지
-
-- **논문 내용:** 논문 제목과 초록의 저작권은 각 저자와 해당 학회 · 출판사에 있습니다. 이 저장소는 논문 데이터를 담거나 재배포하지 않으며, 사용자가 개인 연구용 검색을 위해 공개 출처에서 직접 받습니다. 받은 데이터를 다시 배포하려면 각 출처의 이용 조건을 먼저 확인하세요.
-- **학회 명칭:** NeurIPS, ICLR, ICML은 각 주최 재단의 명칭입니다. 이 프로젝트는 어느 학회와도 관련이 없습니다.
-- **모델:** 판정은 TypeSafe의 Jev 모델을 사용자 본인의 키로 호출해 이뤄지며, 각 제공자([TypeSafe](https://typesafe.ai), [OpenRouter](https://openrouter.ai))의 이용 약관을 따릅니다.
-- **이미지:** `docs/`의 배너와 스크린샷은 이 프로젝트에서 직접 만든 것입니다. 스크린샷 속 논문 제목은 NeurIPS 2025 공개 데이터입니다.
-- **글꼴:** [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch), [Noto Sans KR](https://fonts.google.com/noto/specimen/Noto+Sans+KR) — SIL Open Font License 1.1, Google Fonts에서 불러옵니다.
-- **라이브러리:** [Next.js](https://github.com/vercel/next.js) · [React](https://github.com/facebook/react) (MIT).
+- **논문 데이터**는 저장소에 들어 있지 않습니다. `npm run data`가 각 학회 공식 사이트(`neurips.cc` · `iclr.cc` · `icml.cc`)의 공개 데이터에서 각자의 PC로 받습니다. 공식 데이터에 초록이 없는 ICLR · ICML 2026은 [papercopilot/paperlists](https://github.com/papercopilot/paperlists)에서 초록을 보강합니다.
+- 논문 제목과 초록의 저작권은 저자와 각 학회에 있습니다. 이 프로젝트는 어느 학회와도 관련이 없으며, 받은 데이터를 재배포하려면 각 출처의 이용 조건을 확인하세요.
+- 판정은 사용자 본인의 키로 Jev([TypeSafe](https://typesafe.ai) · [OpenRouter](https://openrouter.ai))를 호출하며, 각 제공자의 약관을 따릅니다.
+- 배너와 스크린샷은 이 프로젝트에서 직접 만들었습니다. 글꼴 Chakra Petch · Noto Sans KR (SIL OFL 1.1), 라이브러리 Next.js · React (MIT).
